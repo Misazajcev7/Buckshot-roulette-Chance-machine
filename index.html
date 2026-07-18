@@ -62,9 +62,23 @@
   .info-btn:hover{background:var(--orange-light);color:var(--ink);}
   .info-btn:focus-visible{outline:2px solid var(--orange-light);outline-offset:2px;}
 
-  @media (max-width:560px){
-    .dealer-photo{width:60px;height:60px;}
+  /* Базовые стили для десктопа */
+.dealer-photo {
+  width: 90px;
+  height: 90px;
+  object-fit: cover; /* Сохраняет пропорции, обрезая лишнее по краям */
+  border-radius: 12px; /* Если нужно сделать скругленные углы */
+}
+
+/* Стили для мобильных экранов */
+@media (max-width: 560px) {
+  .dealer-photo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover; /* Тоже держит пропорции на мобилках */
   }
+}
+
 
   /* ---------- Modal ---------- */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:80;padding:20px;}
