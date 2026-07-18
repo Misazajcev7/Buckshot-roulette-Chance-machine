@@ -804,21 +804,52 @@
   }
 
   function matchCommand(rawText){
-    var text = rawText.toLowerCase();
-    var patterns = commandPatterns[currentLang] || commandPatterns.en;
+  var text = rawText.toLowerCase();
+  var patterns = commandPatterns[currentLang] || commandPatterns.ru;
 
-    var isGreenCmd = patterns.green.test(text);
-    var isRedCmd = patterns.red.test(text);
-    var isAddCmd = patterns.add.test(text);
-    var isSubCmd = patterns.sub.test(text);
+  // 1. ИСПРАВЛЕНИЕ: Сначала проверяем на боевые/холостые (red/green)
+  var isLive = patterns.red.test(text);
+  var isBlank = patterns.green.test(text);
+  var isAdd = patterns.add.test(text);
+  var isSub = patterns.sub.test(text);
 
-    if ((isGreenCmd || isRedCmd) && (isAddCmd || isSubCmd)) {
-      var color = isRedCmd ? 'red' : 'green';
-      var count = parseNumber(text, patterns.numberWords);
-      for (var i = 0; i < count; i++) {
-        if (isAddCmd) { addRound(color); } else { removeRound(color); }
-      }
+  if (isLive || isBlank) {
+    var num = parseNumber(text, patterns.numberWords);
+    if (isLive) {
+      var current = parseInt(document.getElementById('live-input')?.value || 0, 10);
+      var newVal = isAdd ? current + num : (isSub ? current - num : num);
+      var input = document.getElementById('live-input');
+      if(input) { input.value = Math.max(0, Math.min(8, newVal)); input.dispatchEvent(new Event('input')); }
+    } else {
+      var current = parseInt(document.getElementById('blank-input')?.value || 0, 10);
+      var newVal = isAdd ? current + num : (isSub ? current - num : num);
+      var input = document.getElementById('blank-input');
+      if(input) { input.value = Math.max(0, Math.min(8, newVal)); input.dispatchEvent(new Event('input')); }
     }
+    return;
+  }
+
+  // 2. ИСПРАВЛЕНИЕ: Команда Сбросить (Reset)
+  if (patterns.reset.test(text)) {
+    var resetBtn = document.getElementById('reset-btn') || document.querySelector('.reset-btn');
+    if (resetBtn) resetBtn.click();
+    return;
+  }
+
+  // 3. ИСПРАВЛЕНИЕ: Команда Заблокировать (Lock)
+  if (patterns.lock.test(text)) {
+    var lockBtn = document.getElementById('lock-btn') || document.querySelector('.lock-btn');
+    if (lockBtn) lockBtn.click();
+    return;
+  }
+
+  if (patterns.next.test(text)) {
+    var nextBtn = document.getElementById('next-btn') || document.querySelector('.next-btn');
+    if (nextBtn) nextBtn.click();
+    return;
+  }
+}
+
 
     if (patterns.reset.test(text)) {
       el.resetBtn.click();
