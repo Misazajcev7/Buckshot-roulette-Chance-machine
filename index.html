@@ -722,20 +722,38 @@
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  function speak(text){
+    function speak(text){
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
     var lang = currentLang === 'ru' ? 'ru-RU' : 'en-US';
     utter.lang = lang;
     utter.rate = 1.05;
-    var voice = pickVoice(lang, state.voiceGender);
+
+    // Считываем гендер из вашего state (voiceGender)
+    var isFemale = state && state.voiceGender === 'female';
+    var voices = window.speechSynthesis.getVoices();
+    
+    var voice = voices.find(function(v) {
+      var langMatch = currentLang === 'ru' ? v.lang.includes('ru') : v.lang.includes('en');
+      if (isFemale) {
+        // Ищем женские голоса
+        return langMatch && (v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('irina') || v.name.toLowerCase().includes('girl'));
+      } else {
+        // Ищем мужские голоса
+        return langMatch && (v.name.toLowerCase().includes('pavel') || v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('guy') || v.name.toLowerCase().includes('man'));
+      }
+    });
+
     if (voice) utter.voice = voice;
+    
+    // Делаем тон чуть ниже для мужчин и чуть выше для женщин для реалистичности
+    utter.pitch = isFemale ? 1.15 : 0.85;
 
     if (recognitionActive && recognition) {
       try { recognition.stop(); } catch(e){}
     }
-    utter.onend = utter.onerror = function(){
+    utter.onend = utter.onerror = function() {
       if (recognitionActive && recognition) {
         try { recognition.start(); } catch(e){}
       }
