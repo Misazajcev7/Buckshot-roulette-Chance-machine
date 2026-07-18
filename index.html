@@ -86,7 +86,16 @@
 
   /* ---------- Calculator ---------- */
   .app-grid{display:grid;grid-template-columns:1fr 260px;gap:28px;align-items:start;}
-  @media (max-width:720px){.app-grid{grid-template-columns:1fr;}}
+@media (max-width:560px){
+  .dealer-photo {
+    width: 65px; 
+    height: 87px;
+  }
+}
+
+/* Код калькулятора продолжается внутри стилей (БЕЗ здесь!) */
+
+
 
   .calculator{display:flex;flex-direction:column;gap:22px;}
 
