@@ -825,27 +825,57 @@
   var text = rawText.toLowerCase();
   var patterns = commandPatterns[currentLang] || commandPatterns.ru;
 
-  // 1. ИСПРАВЛЕНИЕ: Сначала проверяем на боевые/холостые (red/green)
-  var isLive = patterns.red.test(text);
-  var isBlank = patterns.green.test(text);
-  var isAdd = patterns.add.test(text);
-  var isSub = patterns.sub.test(text);
+  var isGreenCmd = patterns.green.test(text);
+  var isRedCmd = patterns.red.test(text);
+  var isAddCmd = patterns.add.test(text);
+  var isSubCmd = patterns.sub.test(text);
 
-  if (isLive || isBlank) {
-    var num = parseNumber(text, patterns.numberWords);
-    if (isLive) {
-      var current = parseInt(document.getElementById('live-input')?.value || 0, 10);
-      var newVal = isAdd ? current + num : (isSub ? current - num : num);
-      var input = document.getElementById('live-input');
-      if(input) { input.value = Math.max(0, Math.min(8, newVal)); input.dispatchEvent(new Event('input')); }
-    } else {
-      var current = parseInt(document.getElementById('blank-input')?.value || 0, 10);
-      var newVal = isAdd ? current + num : (isSub ? current - num : num);
-      var input = document.getElementById('blank-input');
-      if(input) { input.value = Math.max(0, Math.min(8, newVal)); input.dispatchEvent(new Event('input')); }
+  // 1. Управление патронами (боевые / холостые)
+  if (isGreenCmd || isRedCmd) {
+    var color = isRedCmd ? 'red' : 'green';
+    var count = parseNumber(text, patterns.numberWords);
+    
+    // Если не сказали "минус"/"убрать", по умолчанию прибавляем патроны
+    var shouldAdd = !isSubCmd; 
+    
+    for (var i = 0; i < count; i++) {
+      if (shouldAdd) { 
+        addRound(color); 
+      } else { 
+        removeRound(color); 
+      }
     }
     return;
   }
+
+  // 2. Голосовая команда "Сбросить" (Reset) — нажимает на класс .btn-reset
+  if (patterns.reset.test(text)) {
+    var resetBtn = document.querySelector('.btn-reset') || document.getElementById('reset-btn');
+    if (resetBtn) resetBtn.click();
+    return;
+  }
+
+  // 3. Голосовая команда "Заблокировать" (Lock) — нажимает на класс .btn-lock
+  if (patterns.lock.test(text)) {
+    var lockBtn = document.querySelector('.btn-lock') || document.getElementById('lock-btn');
+    if (lockBtn) lockBtn.click();
+    return;
+  }
+
+  // 4. Голосовая команда "Следующий раунд" (Next)
+  if (patterns.next.test(text)) {
+    var nextBtn = document.querySelector('.btn-next') || document.getElementById('next-btn');
+    if (nextBtn) nextBtn.click();
+    return;
+  }
+  
+  // Проверка триггера имени помощника (Дилера/Сэма)
+  var triggerName = isSamTrigger(text, patterns);
+  if (triggerName) {
+    announcePrediction(triggerName);
+  }
+}
+
 
   // 2. ИСПРАВЛЕНИЕ: Команда Сбросить (Reset)
   if (patterns.reset.test(text)) {
